@@ -8,8 +8,12 @@
 name: OpenWrt-CI
 
 on:
+  workflow_dispatch: 
+  push:
+    branches:
+      - master
   schedule:
-    - cron: 0 20 * * *
+    - cron: 0 0 */3 * *
 
 permissions:
   contents: read
@@ -31,9 +35,9 @@ jobs:
           sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
           sudo -E apt-mark hold grub-efi-amd64-signed
           sudo -E apt update
-          sudo -E apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* dotnet* snap*
+          sudo -E apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* dotnet*  snap*
           sudo -E apt -y full-upgrade
-          sudo -E apt -y install ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+          sudo -E apt -y install file python3-distutils libncurses-dev g++ clang libfuse-dev ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
           sudo -E systemctl daemon-reload
           sudo -E apt -y autoremove --purge
           sudo -E apt clean
@@ -44,19 +48,154 @@ jobs:
 
       - name: Update feeds
         run: |
-          sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          echo 'src-git helloworld https://github.com/fw876/helloworld' >> ./feeds.conf.default
+          git clone https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic.git package/music
+          ./scripts/feeds update -a -f
+          ./scripts/feeds install -a -f
 
       - name: Generate configuration file
-        run: make defconfig
+        run: |
+          rm -f ./.config*
+          touch ./.config
+          cat >> .config <<EOF
+          #
+          # ========================固件定制s部分========================
+          #
+          CONFIG_TARGET_x86=y
+          CONFIG_TARGET_x86_64=y
+          CONFIG_TARGET_x86_64_DEVICE_generic=y
+          CONFIG_BATMAN_ADV_BATMAN_V=y
+          CONFIG_BATMAN_ADV_BLA=y
+          CONFIG_BATMAN_ADV_DAT=y
+          CONFIG_BATMAN_ADV_MCAST=y
+          CONFIG_LIBSODIUM_MINIMAL=y
+          CONFIG_MBEDTLS_AES_C=y
+          CONFIG_MBEDTLS_CMAC_C=y
+          CONFIG_MBEDTLS_DES_C=y
+          CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED=y
+          CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED=y
+          CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED=y
+          CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED=y
+          CONFIG_MBEDTLS_ENTROPY_FORCE_SHA256=y
+          CONFIG_MBEDTLS_GCM_C=y
+          CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED=y
+          CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED=y
+          CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED=y
+          CONFIG_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED=y
+          CONFIG_MBEDTLS_NIST_KW_C=y
+          CONFIG_MBEDTLS_RSA_NO_CRT=y
+          CONFIG_NODEJS_ICU_SMALL=y
+          CONFIG_PACKAGE_UnblockNeteaseMusic=y
+          CONFIG_PACKAGE_alist=y
+          CONFIG_PACKAGE_batctl-default=y
+          CONFIG_PACKAGE_boost=y
+          CONFIG_PACKAGE_boost-program_options=y
+          CONFIG_PACKAGE_boost-system=y
+          CONFIG_PACKAGE_chinadns-ng=y
+          CONFIG_PACKAGE_coreutils=y
+          CONFIG_PACKAGE_coreutils-base64=y
+          CONFIG_PACKAGE_coreutils-nohup=y
+          CONFIG_PACKAGE_dawn=y
+          CONFIG_PACKAGE_dns2socks=y
+          CONFIG_PACKAGE_dns2tcp=y
+          CONFIG_PACKAGE_haproxy=y
+          CONFIG_PACKAGE_hostapd-common=y
+          CONFIG_PACKAGE_ipt2socks=y
+          CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
+          CONFIG_PACKAGE_iptables-mod-iprange=y
+          CONFIG_PACKAGE_iptables-mod-socket=y
+          CONFIG_PACKAGE_iptvhelper=y
+          CONFIG_PACKAGE_iw=y
+          CONFIG_PACKAGE_iwinfo=y
+          CONFIG_PACKAGE_kmod-batman-adv=y
+          CONFIG_PACKAGE_kmod-cfg80211=y
+          CONFIG_PACKAGE_kmod-ipt-conntrack-extra=y
+          CONFIG_PACKAGE_kmod-ipt-iprange=y
+          CONFIG_PACKAGE_kmod-ipt-socket=y
+          CONFIG_PACKAGE_kmod-nf-socket=y
+          CONFIG_PACKAGE_libcares=y
+          CONFIG_PACKAGE_libev=y
+          CONFIG_PACKAGE_libgcrypt=y
+          CONFIG_PACKAGE_libgpg-error=y
+          CONFIG_PACKAGE_libltdl=y
+          CONFIG_PACKAGE_liblua5.3=y
+          CONFIG_PACKAGE_libmbedtls=y
+          CONFIG_PACKAGE_libsodium=y
+          CONFIG_PACKAGE_libudns=y
+          # CONFIG_PACKAGE_libwebsockets-full is not set
+          CONFIG_PACKAGE_luci-app-alist=y
+          CONFIG_PACKAGE_luci-app-design-config=y
+          CONFIG_PACKAGE_luci-app-easymesh=y
+          CONFIG_PACKAGE_luci-app-iptvhelper=y
+          CONFIG_PACKAGE_luci-app-passwall=y
+          CONFIG_PACKAGE_luci-app-passwall_Iptables_Transparent_Proxy=y
+          CONFIG_PACKAGE_luci-app-qbittorrent=y
+          # CONFIG_PACKAGE_luci-app-ttyd is not set
+          CONFIG_PACKAGE_luci-app-unblockmusic_INCLUDE_UnblockNeteaseMusic_NodeJS=y
+          CONFIG_PACKAGE_luci-app-uugamebooster=y
+          CONFIG_PACKAGE_luci-compat=y
+          CONFIG_PACKAGE_luci-i18n-alist-zh-cn=y
+          CONFIG_PACKAGE_luci-i18n-design-config-zh-cn=y
+          CONFIG_PACKAGE_luci-i18n-easymesh-zh-cn=y
+          CONFIG_PACKAGE_luci-i18n-passwall-zh-cn=y
+          CONFIG_PACKAGE_luci-i18n-qbittorrent-zh-cn=y
+          CONFIG_PACKAGE_luci-i18n-uugamebooster-zh-cn=y
+          CONFIG_PACKAGE_luci-theme-design=y
+          CONFIG_PACKAGE_microsocks=y
+          CONFIG_PACKAGE_node=y
+          CONFIG_PACKAGE_qBittorrent-static=y
+          CONFIG_PACKAGE_resolveip=y
+          CONFIG_PACKAGE_shadowsocks-libev-ss-local=y
+          CONFIG_PACKAGE_shadowsocks-libev-ss-redir=y
+          CONFIG_PACKAGE_shadowsocks-libev-ss-server=y
+          CONFIG_PACKAGE_shadowsocksr-libev-ssr-local=y
+          CONFIG_PACKAGE_shadowsocksr-libev-ssr-redir=y
+          CONFIG_PACKAGE_simple-obfs=y
+          CONFIG_PACKAGE_tcping=y
+          CONFIG_PACKAGE_trojan-plus=y
+          # CONFIG_PACKAGE_ttyd is not set
+          CONFIG_PACKAGE_umdns=y
+          CONFIG_PACKAGE_unzip=y
+          CONFIG_PACKAGE_uugamebooster=y
+          CONFIG_PACKAGE_v2ray-core=y
+          CONFIG_PACKAGE_v2ray-plugin=y
+          CONFIG_PACKAGE_wireless-regdb=y
+          CONFIG_PACKAGE_wpad-openssl=y
+          CONFIG_PACKAGE_xray-core=y
+          CONFIG_TARGET_ROOTFS_PARTSIZE=320
+          CONFIG_WPA_MBO_SUPPORT=y
+          CONFIG_WPA_MSG_MIN_PRIORITY=3
+          CONFIG_boost-compile-visibility-hidden=y
+          CONFIG_boost-runtime-shared=y
+          CONFIG_boost-static-and-shared-libs=y
+          CONFIG_boost-variant-release=y
+          # CONFIG_WPA_MBO_SUPPORT is not set
+          #
+          # ========================固件定制部分结束========================
+          #
+          EOF
+          sed -i 's/^[ \t]*//g' ./.config
+          make defconfig
+          # 网络配置信息，将从 zzz-default-settings 文件的第2行开始添加
+          sed -i "2i # network config" ./package/lean/default-settings/files/zzz-default-settings
+          # 默认 IP 地址，旁路由时不会和主路由的 192.168.1.1 冲突
+          sed -i "3i uci set network.lan.ipaddr='192.168.31.23'" ./package/lean/default-settings/files/zzz-default-settings
+          sed -i "4i uci set network.lan.proto='static'" ./package/lean/default-settings/files/zzz-default-settings # 静态 IP
+          sed -i "5i uci set network.lan.type='bridge'" ./package/lean/default-settings/files/zzz-default-settings  # 接口类型：桥接
+          sed -i "6i uci set network.lan.ifname='eth0'" ./package/lean/default-settings/files/zzz-default-settings  # 网络端口：默认 eth0，第一个接口
+          sed -i "7i uci set network.lan.netmask='255.255.255.0'" ./package/lean/default-settings/files/zzz-default-settings    # 子网掩码
+          sed -i "8i uci set network.lan.gateway='192.168.31.1'" ./package/lean/default-settings/files/zzz-default-settings  # 默认网关地址（主路由 IP）
+          sed -i "9i uci set network.lan.dns='223.5.5.5 223.6.6.6'" ./package/lean/default-settings/files/zzz-default-settings  # 默认上游 DNS 地址
+          sed -i "10i uci set network.lan.broadcast='192.168.31.255'" ./package/lean/default-settings/files/zzz-default-settings  # 默认上游 DNS 地址
+          sed -i "11i uci commit network\n" ./package/lean/default-settings/files/zzz-default-settings
+
 
       - name: Download packages
         run: make download -j16
 
       - name: Compile firmware
         run: |
-          make -j$(nproc) || make -j1 V=s
+          make -j $(nproc) || make -j1 V=s
           echo "======================="
           echo "Space usage:"
           echo "======================="
