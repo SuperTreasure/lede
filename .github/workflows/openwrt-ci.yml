@@ -129,7 +129,7 @@ jobs:
           CONFIG_PACKAGE_luci-app-iptvhelper=y
           CONFIG_PACKAGE_luci-app-passwall=y
           CONFIG_PACKAGE_luci-app-passwall_Iptables_Transparent_Proxy=y
-          CONFIG_PACKAGE_luci-app-qbittorrent=y
+          # CONFIG_PACKAGE_luci-app-qbittorrent=y
           # CONFIG_PACKAGE_luci-app-ttyd is not set
           CONFIG_PACKAGE_luci-app-unblockmusic_INCLUDE_UnblockNeteaseMusic_NodeJS=y
           CONFIG_PACKAGE_luci-app-uugamebooster=y
@@ -138,7 +138,7 @@ jobs:
           CONFIG_PACKAGE_luci-i18n-design-config-zh-cn=y
           CONFIG_PACKAGE_luci-i18n-easymesh-zh-cn=y
           CONFIG_PACKAGE_luci-i18n-passwall-zh-cn=y
-          CONFIG_PACKAGE_luci-i18n-qbittorrent-zh-cn=y
+          # CONFIG_PACKAGE_luci-i18n-qbittorrent-zh-cn=y
           CONFIG_PACKAGE_luci-i18n-uugamebooster-zh-cn=y
           CONFIG_PACKAGE_luci-theme-design=y
           CONFIG_PACKAGE_microsocks=y
