@@ -45,11 +45,10 @@ jobs:
 
       - name: Checkout OpenWrt
         uses: actions/checkout@v4
-        run: |
-          df -h
 
       - name: Update feeds
         run: |
+          df -h
           echo 'src-git helloworld https://github.com/fw876/helloworld' >> ./feeds.conf.default
           git clone https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic.git package/music
           ./scripts/feeds update -a -f
